@@ -65,12 +65,11 @@ void format_add_error(json_object *root, json_object *error)
 
 void format_set_data(json_object *root, json_object *data)
 {
-	json_object *data_obj;
-
-	json_object_object_get_ex(root, DATA_KEY, &data_obj);
-
-	if (!data_obj)
-		json_object_object_add(root, DATA_KEY, data);
+	if (json_object_object_get_ex(root, DATA_KEY, NULL)) {
+		json_object_put(data);
+		return;
+	}
+	json_object_object_add(root, DATA_KEY, data);
 }
 
 void format_add_data(json_object *root, json_object *data)
