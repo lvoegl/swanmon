@@ -17,7 +17,7 @@ struct command {
 	const char *name;
 	const char *event_name;
 	const char *description;
-} command;
+};
 
 static const struct command help_command = {"help", NULL, "Shows swanmon help"};
 static const struct command commands[] = {
