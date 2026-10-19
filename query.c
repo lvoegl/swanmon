@@ -185,9 +185,9 @@ int query_command(const char *command, const char *event)
 		goto out;
 	}
 
-	davici_disconnect(dd.c);
-
 	out:
+		if (dd.c)
+			davici_disconnect(dd.c);
 		format_dump_json(dd.response, stdout);
 		if (has_errors(dd.response))
 			ret = 1;
