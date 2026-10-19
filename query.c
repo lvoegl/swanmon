@@ -17,6 +17,8 @@
 #include "query.h"
 #include "format.h"
 
+#define DISPATCH_TIMEOUT_MS 10000
+
 struct dispatch_data {
 	struct pollfd pfd;
 	struct davici_conn *c;
@@ -122,14 +124,22 @@ static int dispatch(struct dispatch_data *dd)
 {
 	int err, ret;
 
-	while (dd->pending && dd->pfd.fd != -1) {
-		ret = poll(&dd->pfd, 1, -1);
-		if (ret < 0)
-			return -errno;
-		if (ret != 1)
-			return -EIO;
+	while (dd->pending) {
+		if (dd->pfd.fd == -1)
+			return -ECONNRESET;
 
-		if (dd->pfd.revents & POLLIN) {
+		ret = poll(&dd->pfd, 1, DISPATCH_TIMEOUT_MS);
+		if (ret < 0) {
+			if (errno == EINTR)
+				continue;
+			return -errno;
+		}
+		if (ret == 0)
+			return -ETIMEDOUT;
+
+		if (dd->pfd.revents & POLLNVAL)
+			return -EBADF;
+		if (dd->pfd.revents & (POLLIN | POLLHUP | POLLERR)) {
 			err = davici_read(dd->c);
 			if (err < 0)
 				return err;
