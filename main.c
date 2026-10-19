@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <locale.h>
 
 #include "query.h"
 
@@ -100,6 +101,9 @@ int main(int argc, const char *argv[])
 {
 	const char *command_name;
 	const struct command *command;
+
+	/* required for is_text() UTF-8 decoding */
+	setlocale(LC_CTYPE, "C.UTF-8");
 
 	if (argc < 2) {
 		usage();
